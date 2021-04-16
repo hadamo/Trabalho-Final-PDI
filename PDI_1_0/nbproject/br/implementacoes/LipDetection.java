@@ -79,8 +79,8 @@ public class LipDetection {
                 float cb = Cb[i][j];
                 float cr = Cr[i][j];
 
-                cb = Normalize(cb, maxCb, minCb, 0, 255);
-                cr = Normalize(cr, maxCr, minCr, 0, 255);
+                // cb = Normalize(cb, maxCb, minCb, 0, 255);
+                // cr = Normalize(cr, maxCr, minCr, 0, 255);
 
                 float cr2 = cr * cr;
                 float crcb = cr / (cb + 1);
@@ -98,13 +98,13 @@ public class LipDetection {
                     maxCr2 = cr2;
                     maxCrCb = crcb;
                 } else {
-                    if (cr > maxCr2)
+                    if (cr2 > maxCr2)
                         maxCr2 = cr2;
-                    if (cb > maxCrCb)
+                    if (crcb > maxCrCb)
                         maxCrCb = crcb;
-                    if (cr < minCr2)
+                    if (cr2 < minCr2)
                         minCr2 = cr2;
-                    if (cb < minCrCb)
+                    if (crcb < minCrCb)
                         minCrCb = crcb;
                 }
                 // somatorioCr2 += cr * cr;
@@ -117,6 +117,7 @@ public class LipDetection {
                 float crcb = Crcb[i][j];
                 float cr2 = Cr2[i][j];
 
+            
                 crcb = Normalize(crcb, maxCrCb, minCrCb, 0, 255);
                 cr2 = Normalize(cr2, maxCr2, minCr2, 0, 255);
                 Crcb[i][j] = crcb;
