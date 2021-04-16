@@ -73,7 +73,7 @@ public class PDI_Lote extends javax.swing.JFrame {
         setResizable(false);
 
         CaminhoImagemOriginal.setEditable(false);
-        CaminhoImagemOriginal.setText("C:\\Users\\hadam\\Google Drive\\Ufes\\2020\\pdi\\Trabalho Final\\DatasetRostos");
+        // CaminhoImagemOriginal.setText("C:\\Users\\hadam\\Google Drive\\Ufes\\2020\\pdi\\Trabalho Final\\DatasetRostos");
         CaminhoImagemOriginal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CaminhoImagemOriginalActionPerformed(evt);
@@ -94,7 +94,7 @@ public class PDI_Lote extends javax.swing.JFrame {
         });
 
         CaminhoSaidaImagem.setEditable(false);
-        CaminhoSaidaImagem.setText("C:\\Users\\hadam\\Google Drive\\Ufes\\2020\\pdi\\Trabalho Final\\Saida");;
+        // CaminhoSaidaImagem.setText("C:\\Users\\hadam\\Google Drive\\Ufes\\2020\\pdi\\Trabalho Final\\Saida");;
         CaminhoSaidaImagem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CaminhoSaidaImagemActionPerformed(evt);
