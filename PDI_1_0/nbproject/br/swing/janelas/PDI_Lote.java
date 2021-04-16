@@ -248,7 +248,7 @@ public class PDI_Lote extends javax.swing.JFrame {
                         // resvariavelK = WA.GreennKG(imgvariavelK);
                         resvariavelK = LP.LipDetector(imgvariavelK);
                         //Nome que vai no nome do arquivo para identificar t�cnica.
-                        Nome = "_BHE2PL";
+                        Nome = "_LipMap";
                         //SAIDA CONTENDO CAMINHO DA IMAGEM + NOME DA IMAGEM
                         String aSaida = pastaSalvar + imagevariavelK + Nome + ".png";
                         File outputFile = new File(aSaida);
