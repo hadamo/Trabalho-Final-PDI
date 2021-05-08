@@ -15,64 +15,48 @@ public class LipDetection {
     public LipDetection() {
     }
 
+    /**
+     * Método para detectar pixels de lábios em imagens de rosto.
+     * @author Hádamo Egito
+     * @param img : BufferedImage para detecção
+     * @return workingImage: BufferedImage onde pixels de cor mais próximo da cor 
+     *         branca são os com maior probabilidade de serem pixels de lábios
+     */
     public BufferedImage LipDetector(BufferedImage img) {
+        //Criação de imagem para armazenar resultados e de propriedades da imagem
         BufferedImage workingImage = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
-
         int imgHeight = img.getHeight();
         int imgWidth = img.getWidth();
-        int numPixels = imgHeight * imgWidth;
 
-        float minCr = 0, minCb = 0, maxCr = 0, maxCb = 0;
-
-        float normalizeMin = 0;
-        float normalizeMax = 255;
-
+        //Variaveis para guardar valores de canais de cores YCbCr
         float[][] Y = new float[imgWidth][imgHeight];
         float[][] Cb = new float[imgWidth][imgHeight];
         float[][] Cr = new float[imgWidth][imgHeight];
 
+        //Variaveis para os canais Cr² e Cr/Cb
         float[][] Cr2 = new float[imgWidth][imgHeight];
         float[][] Crcb = new float[imgWidth][imgHeight];
 
-        float[][] corFinal = new float[imgWidth][imgHeight];
-
+        //Variaveis para as partes da fórmula isLipcolor
         float somatorioCr2 = 0;
         float somatorioRazaoCrCb = 0;
         float n;
 
+        //Conversão para YCbCr 
         for (int i = 0; i < imgWidth; i++) {
             for (int j = 0; j < imgHeight; j++) {
+                //Conversão para YCbCr
                 Color color = new Color(img.getRGB(i, j));
                 float[] convertedColor = this.RGBtoYCrCb(color);
 
-                float cb = convertedColor[1];
-                float cr = convertedColor[2];
-
-                if (i == 0 && j == 0) {
-                    minCr = cr;
-                    minCb = cb;
-
-                    maxCr = cr;
-                    maxCb = cb;
-                } else {
-                    if (cr > maxCr)
-                        maxCr = cr;
-                    if (cb > maxCb)
-                        maxCb = cb;
-                    if (cr < minCr)
-                        minCr = cr;
-                    if (cb < minCb)
-                        minCb = cb;
-                }
-
+                //Armazenando resultados de conversão
                 Y[i][j] = convertedColor[0];
-                Cb[i][j] = cb;
-                Cr[i][j] = cr;
+                Cb[i][j] = convertedColor[1];
+                Cr[i][j] = convertedColor[2];
             }
         }
 
-        // NORMALIZAR
-
+        //Cálculo de  Cr² e Cr/Cb e de seus mínimos e máximos para normalização
         float minCr2 = 0, minCrCb = 0, maxCr2 = 0, maxCrCb = 0;
         for (int i = 0; i < imgWidth; i++) {
             for (int j = 0; j < imgHeight; j++) {
@@ -107,11 +91,10 @@ public class LipDetection {
                     if (crcb < minCrCb)
                         minCrCb = crcb;
                 }
-                // somatorioCr2 += cr * cr;
-                // somatorioRazaoCrCb += cr / cb;
             }
         }
 
+        //calculo de somatório de valores normalizados
         for (int i = 0; i < imgWidth; i++) {
             for (int j = 0; j < imgHeight; j++) {
                 float crcb = Crcb[i][j];
@@ -129,17 +112,23 @@ public class LipDetection {
             }
         }
 
+        //Cálculo da componente n da fórmula de detecção
         n = (float) 0.95 * (somatorioCr2 / somatorioRazaoCrCb);
 
+        //Variáveis para guardar valores máximos e mínimos das cores 
+        //encontradas na detecção para cada pixel para normalizar
         float[][] cores = new float[imgWidth][imgHeight];
         float maxCor = 0, minCor = 0;
 
+        //Cálculo de cor resultante da detecção e de mínimos e máximos para normalizar o resultado
         for (int i = 0; i < imgWidth; i++) {
             for (int j = 0; j < imgHeight; j++) {
 
                 float cr2 = Cr2[i][j];
                 float crcb = Crcb[i][j];
 
+                //Cálculo dos componentes da função de detecção
+                // de Cr² * (Cr² - n * Cr/Cb)²
                 float cr2ncrcb = (cr2 - n * (crcb));
                 float cor = cr2 * cr2ncrcb * cr2ncrcb;
 
@@ -153,15 +142,19 @@ public class LipDetection {
                         minCor = cor;
                 }
 
+                // Salvando a cor com resultado da detecção para normalização
                 cores[i][j] = cor;
-
             }
         }
 
+        //Normalizar cores e conversão para rgb em níveis de cinza
+        //onde quanto mais próximo de 255 mais provável que o pixel seja de lábio
+        //e quanto mais próximo de 0 mais provável que não seja.
         for (int i = 0; i < imgWidth; i++) {
             for (int j = 0; j < imgHeight; j++) {
                 int cor = (int) Normalize(cores[i][j] , maxCor, minCor, 0, 255);
                 Color novo = new Color(cor, cor, cor);
+                //salva a cor no pixel da imagem resultante
                 workingImage.setRGB(i, j, novo.getRGB());
             }
         }
@@ -169,11 +162,27 @@ public class LipDetection {
         return workingImage;
     }
 
+    /**
+     * Método para normalizar valor através do intervalo 
+     * de mínimos e máximos originais e de mínimos e máximos desejados
+     * @param value
+     * @param max
+     * @param min
+     * @param intervalMin
+     * @param inertervalMax
+     * @return valor normalizado : float
+     */
     public float Normalize(float value, float max, float min, float intervalMin, float inertervalMax) {
         return ((value - min) / (max - min)) * (inertervalMax - intervalMin) + intervalMin;
     }
 
+    /**
+     * Método para transformar cor de pixel rgb para ycbcr
+     * @param pixel : Color pixel com cor em RGB
+     * @return yCbCr : float[3] vetor de float com os 3 canais YCbCr
+     */
     public float[] RGBtoYCrCb(Color pixel) {
+        //Recuperar os 3 canais de cor do pixel RGB
         float r = pixel.getRed();
         float g = pixel.getGreen();
         float b = pixel.getBlue();
@@ -181,6 +190,7 @@ public class LipDetection {
         float[] yCbCr = new float[3];
         float y, cb, cr;
 
+        //Conversão para os três canais Y CB CR
         y = (float) ((0.229 * r) + (0.587 * g) + (0.144 * b));
         cb = (float) ((0.168 * r) - (0.3313 * g) + (0.5 * b)) + 128;
         cr = (float) ((0.5 * r) - (0.4187 * g) - (0.0813 * b)) + 128;
